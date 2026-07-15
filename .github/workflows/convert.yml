@@ -1,0 +1,48 @@
+name: Convert and Build Safari Extension
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # Allows you to manually trigger this anytime
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Convert Extension to Xcode Project
+      run: |
+        xcrun safari-web-extension-converter . \
+          --no-open \
+          --project-location ./SafariExtension \
+          --app-name "MyExtension" \
+          --bundle-identifier "com.local.myextension" \
+          --macos-only \
+          --copy-resources \
+          --no-prompt
+
+    - name: Build Mac App
+      run: |
+        xcodebuild -project ./SafariExtension/MyExtension.xcodeproj \
+          -scheme "MyExtension" \
+          -configuration Release \
+          -derivedDataPath ./build \
+          CODE_SIGN_IDENTITY="-" \
+          CODE_SIGNING_REQUIRED=YES \
+          CODE_SIGNING_ALLOWED=YES
+
+    - name: Package App Bundle
+      run: |
+        mkdir staging
+        cp -R ./build/Build/Products/Release/MyExtension.app ./staging/
+        cd staging
+        zip -r ../MyExtension-Safari.zip MyExtension.app
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MyExtension-Safari
+        path: MyExtension-Safari.zip
