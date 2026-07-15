@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Focus Buffer",
+  "version": "1.0",
+  "description": "Enforces intentionality via delay timers and scroll blocks on YouTube.",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "browser_specific_settings": {
+    "safari": {
+      "strict_min_version": "15.0"
+    }
+  }
+}
